@@ -1,0 +1,5 @@
+# Frontend static code
+src/target
+src/node_modules
+
+*.log
