@@ -1,9 +1,9 @@
 import React from 'react'
 import './styles.scss'
 
-const TodoComponentList = ({children}) => {
+const TodoComponentList = (props) => {
   return (
-    <div className="container">{children}</div>
+    <div className="container">{props.children}</div>
   )
 }
 

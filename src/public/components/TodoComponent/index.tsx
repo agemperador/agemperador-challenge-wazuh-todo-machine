@@ -1,13 +1,17 @@
 import React from 'react'
-import './styles.scss'
+import { Container } from './TodoComponent.styles'
 
-const TodoComponet = ({title,id, handleEdit,handleDelete}) => {
+
+const TodoComponet  = ({title,id, status,priority, creationDate, handleEdit,handleDelete,key}) => {
+  console.log(id);
+  
   return (
-    <div className="container">
-      <h3>{title}</h3>
-      <span onClick={()=>handleEdit(id)}>edit </span>
-      <span onClick={()=>handleDelete(id)}> delete</span>
-    </div>
+    <Container bg={status? "#77AA33" : priority.color} key={key}>
+      <h3>{title} -  <span>{creationDate}</span></h3>
+      <span onClick={()=>handleEdit(id, {status:!status})}><b>{status? "UNDO" : "COMPLETE"}</b> </span>
+      <span onClick={()=>handleEdit(id)}><b>edit</b> </span>
+      <span onClick={()=>handleDelete(id)}><b> delete</b></span>
+    </Container>
   )
 }
 

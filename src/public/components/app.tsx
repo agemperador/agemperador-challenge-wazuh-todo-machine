@@ -2,20 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { BrowserRouter as Router } from 'react-router-dom';
-
-import {
-  EuiButton,
-  EuiHorizontalRule,
-  EuiPage,
-  EuiPageBody,
-  EuiListGroup,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageHeader,
-  EuiTitle,
-  EuiText,
-} from '@elastic/eui';
+import {http} from 
 
 import { CoreStart } from '../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
@@ -23,6 +10,11 @@ import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
 import TodoComponet from './TodoComponent';
 import TodoComponentList from './TodoComponentList';
+import { priorities } from '../models/Priority.entity';
+import AddButton from './AddButton';
+import LoadingComponent from './LoadingComponent';
+import AddTodoModal from './AddTodoModal';
+import { Todo } from '../models/Todo.entity';
 
 interface CustomPluginAppDeps {
   basename: string;
@@ -32,30 +24,34 @@ interface CustomPluginAppDeps {
 }
 
 
-const todoListMock = [
+const todoListMock: Todo[] = [
   {
     id: 1,
     title: 'Learn React',
     completed: false,
-    creationDate: new Date()
+    creationDate: new Date(),
+    priority: priorities.HIGH
   },
   {
     id: 2,
     title: 'Learn Redux',
     completed: false,
-    creationDate: new Date()
+    creationDate: new Date(),
+    priority: priorities.MEDIUM
   },
   {
     id: 3,
     title: 'Learn ES6',
     completed: false,
-    creationDate: new Date()
+    creationDate: new Date(),
+    priority: priorities.LOW
   },
   {
     id: 4,
     title: 'Learn Node',
     completed: false,
-    creationDate: new Date()
+    creationDate: new Date(),
+    priority: priorities.HIGH
   }
 ]
 
@@ -85,29 +81,82 @@ export const CustomPluginApp = ({
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
 
   const [todoList, setTodoList] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
+  const [addModalOpen, setAddModalOpen] = useState(false)
 
 
   console.log("HOLLAAAAA");
 
   console.log("HOLLAAAAAaaaaa");
 
+  useEffect(() => {
+    http.get('/get'
+
+    const data = fetch('/api', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((response) => console.log(response))
+    
+    console.log(data);
+    
+  })
 
   useEffect(() => {
-        console.log("cargando datos");
-        setTodoList( todoListMock)
-        console.log("datos cargados");
+        console.log("cargando datos...");
+        setLoading(true);
+        setTimeout(() => { 
+
+          const todoListStorage = localStorage.getItem("TODO_LIST_V1")
+          if (todoListStorage) {
+            console.log(todoListStorage);
+            setTodoList(JSON.parse(todoListStorage))
+            console.log("Cargando de logalStorage");
+          } else {
+            setTodoList( todoListMock);
+            localStorage.setItem("TODO_LIST_V1", JSON.stringify(todoListMock))
+            console.log("Cargando de Mock");
+            
+          }
+          console.log("datos cargados");
+          setLoading(false);
+        },1000)
     }
   , [])
   
 
-
-  const handleDeleteTodo = (id: number ) => { 
-    console.log("DELETE " + id);
-  }
-  const handleEditTodo = (id: number ) => { 
-    console.log("EDIT " + id);
+  const saveTodos = (todoList:Todo[]) => {
+    setTodoList(todoList)
+    localStorage.setItem("TODO_LIST_V1", JSON.stringify(todoList))
   }
 
+  const handleDeleteTodo = (id: number, todoList:Todo[] ) => { 
+    const newTodoList = todoList.filter((todo) => todo.id!== id)
+    saveTodos(newTodoList)
+  }
+  const handleEditTodo = (id: number, partialTodo : Partial<Todo> | Todo ,todoList:Todo[]) => { 
+    const previousTodo = todoList.find(todo => todo.id === id)
+    const updatedTodo = {...previousTodo,...partialTodo}
+    const newTodoList = todoList.map((todo) => todo.id === id ? updatedTodo : todo)
+    saveTodos(newTodoList)
+  }
+  const handleAddModal = () => { 
+    setAddModalOpen(!addModalOpen)
+  }
+
+  const getId =(todoList) =>{
+    return todoList.reduce((max,todo)=> Math.max(todo.id, max),0) + 1
+  }
+
+  const handleAddTodo = (todo: Todo, todoList:Todo[]) => {
+    todo.id = getId(todoList)
+    console.log(todo.id);
+    
+    const newTodoList = [...todoList, todo]
+    saveTodos(newTodoList)
+  }
 
   return (
     <Router basename={basename}>
@@ -118,77 +167,43 @@ export const CustomPluginApp = ({
             showSearchBar={true}
             useDefaultBehaviors={true}
           />
-          
-          <div>
-            {todoList.map(todo=> {
-              return (
-                <TodoComponentList>
-                  <TodoComponet
-                    key={todo.id}
-                    id={todo.id}
-                    title={todo.title}
-                    completed={todo.completed}
-                    creationDate={todo.creationDate}
-                    handleDelete={handleDeleteTodo}
-                    handleEdit={handleEditTodo}
-                  />
-                </TodoComponentList>
-              )
-            })}
-          </div>
-{/*           <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
-            showSearchBar={true}
-            useDefaultBehaviors={true}
-          />
-          <EuiPage restrictWidth="1000px">
-            <EuiPageBody component="main">
-              <EuiPageHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="customPlugin.helloWorldText"
-                      defaultMessage="{name}"
-                      values={{ name: PLUGIN_NAME }}
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageHeader>
-              <EuiPageContent>
-                <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
-                      <FormattedMessage
-                        id="customPlugin.congratulationsTitle"
-                        defaultMessage="Congratulations, you have successfully created a new OpenSearch Dashboards Plugin!"
+            {
+              loading?
+              <LoadingComponent/>
+              :
+              <div>
+                  {todoList.map(todo=> {
+                    return (
+                      <TodoComponentList>
+                        {<TodoComponet
+                          key={todo.id}
+                          id={todo.id}
+                          title={todo.title}
+                          priority={todo.priority}
+                          status={todo.status}
+                          creationDate={todo.creationDate.toString()}
+                          handleDelete={(id)=>handleDeleteTodo(id,todoList)}
+                          handleEdit={(id, partialTodo)=>handleEditTodo(id,partialTodo,todoList)}
+                        />}
+                      </TodoComponentList>
+                    )
+                  })}
+                <div>
+                  <AddButton renderText={addModalOpen? "CLOSE": "ADD"} handleAddModal={handleAddModal}/>
+                </div>
+                {
+                  addModalOpen && 
+                    <div>
+                      <AddTodoModal
+                        onSave={(todo)=>handleAddTodo(todo,todoList)}
+                        open={addModalOpen}
+                        onClose={() => setAddModalOpen(false)}
                       />
-                    </h2>
-                  </EuiTitle>
-                </EuiPageContentHeader>
-                <EuiPageContentBody>
-                  <EuiText>
-                    <p>
-                      <FormattedMessage
-                        id="customPlugin.content"
-                        defaultMessage="Look through the generated code and check out the plugin development documentation."
-                      />
-                    </p>
-                    <EuiHorizontalRule />
-                    <p>
-                      <FormattedMessage
-                        id="customPlugin.timestampText"
-                        defaultMessage="Last timestamp: {time}"
-                        values={{ time: timestamp ? timestamp : 'Unknown' }}
-                      />
-                    </p>
-                    <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                      <FormattedMessage id="customPlugin.buttonText" defaultMessage="Get data" />
-                    </EuiButton>
-                  </EuiText>
-                </EuiPageContentBody>
-              </EuiPageContent>
-            </EuiPageBody>
-          </EuiPage> */}
+                    </div>
+                }
+              </div>
+              
+            }
         </>
       </I18nProvider>
     </Router>
