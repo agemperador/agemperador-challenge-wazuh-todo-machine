@@ -1,17 +1,17 @@
 export const priorities = Object.freeze({
-    HIGH: {
+    "HIGH": {
       priority:'High',
       color: '#FF0000'
     },
-    MEDIUM: {
+    "MEDIUM": {
       priority:'Medium',
       color: '#00FF00'
     },
-    LOW: {
+    "LOW": {
       priority:'Low',
       color: '#0000FF'
     },
-    PERSONAL: {
+    "PERSONAL": {
       priority:'Personal',
       color: '#FFF'
     },
