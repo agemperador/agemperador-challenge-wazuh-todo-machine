@@ -13,11 +13,54 @@ export const useTodos = (http) =>{
       console.log("cargando datos...");
       setLoading(true);
       
-      fetchData()
+      const getData = async ()=> {
+
+        const indexOk = await fetchIndex()
+        if (indexOk.ok) {
+          await fetchData()
+        }
+        else {
+          await createIndex()
+        }
+      }
+      getData()
   
       console.log("datos cargados");
       setLoading(false);        
     }, [])
+
+
+
+    const fetchIndex = async () =>{
+
+      try{
+        const indexOk = (await  http.get('/api/v1/indices'))
+        console.log(indexOk);
+        return indexOk
+      }catch(err){
+        console.log(err);
+        return {
+          ok:false
+        }
+      }
+
+    }
+
+    const createIndex = async () =>{
+
+      try{
+        const indexOk =  (await  http.post('/api/v1/indices')).response
+        return indexOk
+      }catch(err){
+        console.log(err);
+        
+        return {
+          ok:false
+        }
+      }
+      
+
+    }
   
       const fetchData = async () =>{
         let todoListStorage:Todo[]

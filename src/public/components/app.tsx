@@ -54,6 +54,7 @@ export const CustomPluginApp = ({
   addTodo(todo, todoList)
  }
 
+
 console.log(todoList);
 
   return (
@@ -66,7 +67,7 @@ console.log(todoList);
             useDefaultBehaviors={true}
           />
               <div>
-                  {addModalOpen || <AddButton handleAddModal={handleAddModal}/>}
+                  {addModalOpen || <AddButton renderText={"New To-Do"} color="#006bb8" handleAddModal={handleAddModal}/>}
                 </div>
                 {
                   addModalOpen && 

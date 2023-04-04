@@ -56,7 +56,7 @@ export class CustomPluginPlugin
 
     router.post(
       {
-        path:'/api/indices',
+        path:'/api/v1/indices',
         validate: false,
       },
       async (context, req, res) => {
@@ -83,6 +83,30 @@ export class CustomPluginPlugin
         })
       })
 
+      router.get(
+        {
+          path:'/api/v1/indices',
+          validate: false,
+        },
+        async (context, req, res) => {
+          var index_name = INDEX_NAME;
+  
+
+      
+          var response = await client.indices.get({
+            index: index_name,
+          }).then(response => response) 
+      
+          console.log(response
+            );
+          
+          return res.ok({
+            body:{
+              ok:true,
+              response,
+            }
+          })
+        })
       router.get(
         {
           path:'/api/plugin/v1/todos',
